@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src data:; style-src 'self'; script-src 'self'">
+  <title>Luma 选择录制区域</title>
+  <link rel="stylesheet" href="region.css">
+</head>
+<body tabindex="-1">
+  <img id="screen" alt="屏幕截图">
+  <div id="shade"></div>
+  <div id="box" hidden><span id="dimensions"></span></div>
+  <div id="tip">拖动鼠标，选择要录制的屏幕区域 <span>选好后确认，再开始录制</span></div>
+  <div id="controls" role="group" aria-label="确认录制区域">
+    <span id="selection-status" role="status" aria-live="polite">请先框选区域</span>
+    <div class="actions">
+      <button id="reset" type="button" disabled>重新框选</button>
+      <button id="cancel" type="button">取消 <kbd>Esc</kbd></button>
+      <button id="confirm" type="button" disabled>确认区域 <kbd>↵</kbd></button>
+    </div>
+  </div>
+  <script src="region.js"></script>
+</body>
+</html>

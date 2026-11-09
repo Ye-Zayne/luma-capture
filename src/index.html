@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: file:; style-src 'self'; script-src 'self'">
+  <title>Luma · 录屏转 GIF</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="toolbar.css">
+</head>
+<body class="surface-studio">
+<section id="capture-toolbar" aria-label="屏幕录制工具栏" data-state="idle">
+  <button id="toolbar-close" class="toolbar-close" type="button" aria-label="关闭录制工具栏" title="关闭录制工具栏">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8.5 8.5 7 7m0-7-7 7"/></svg>
+  </button>
+
+  <div class="toolbar-modes" role="group" aria-label="录制范围">
+    <button class="toolbar-mode" data-toolbar-mode="screen" type="button" aria-label="录制整个屏幕" aria-pressed="false" title="录制整个屏幕">
+      <svg viewBox="0 0 48 40" fill="none" aria-hidden="true"><rect x="5" y="5" width="34" height="26" rx="4"/><path d="M6 11h32M10 25h19"/><circle class="toolbar-icon-halo" cx="37" cy="30" r="8"/><circle cx="37" cy="30" r="5"/></svg>
+    </button>
+    <button class="toolbar-mode" data-toolbar-mode="window" type="button" aria-label="录制指定窗口" aria-pressed="false" title="录制指定窗口">
+      <svg viewBox="0 0 48 40" fill="none" aria-hidden="true"><path d="M28 31H9a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4h26a4 4 0 0 1 4 4v11"/><path class="toolbar-window-dots" d="M10 10h.1M14 10h.1M18 10h.1"/><circle class="toolbar-icon-halo" cx="37" cy="30" r="8"/><circle cx="37" cy="30" r="5"/></svg>
+    </button>
+    <button class="toolbar-mode" data-toolbar-mode="region" type="button" aria-label="录制自选区域" aria-pressed="true" title="录制自选区域">
+      <svg viewBox="0 0 48 40" fill="none" aria-hidden="true"><path stroke-dasharray="5 4" d="M28 31H5V5h34v15"/><circle class="toolbar-icon-halo" cx="37" cy="30" r="8"/><circle cx="37" cy="30" r="5"/></svg>
+    </button>
+  </div>
+
+  <span class="toolbar-divider" aria-hidden="true"></span>
+
+  <button id="toolbar-caption" class="toolbar-caption" type="button" title="打开录制详情">
+    <span id="toolbar-caption-title">录制整个屏幕</span>
+    <span id="toolbar-caption-detail" aria-live="polite">正在读取屏幕…</span>
+  </button>
+
+  <button id="toolbar-options" class="toolbar-options" type="button" aria-haspopup="menu" title="录制与 GIF 选项">
+    <span>选项</span><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+  </button>
+
+  <button id="toolbar-record" class="toolbar-record" type="button" disabled>
+    <span class="toolbar-record-indicator" aria-hidden="true"></span><span id="toolbar-record-label">录制</span>
+  </button>
+</section>
+
+  <header><div class="brand"><span class="logo">L</span> luma<span class="tag">A LITTLE MOMENT. IN MOTION.</span></div><div class="studio-controls"><button id="compact-button" class="text-button">收起到工具条 ↘</button><span class="local"><i></i> 本地处理</span><button id="window-minimize" class="window-control" aria-label="最小化">−</button><button id="window-close" class="window-control" aria-label="关闭">×</button></div></header>
+  <main>
+    <div id="message" role="alert" hidden></div>
+    <section id="progress-panel" aria-live="polite" hidden><div><b id="progress-label">正在转换</b><span>请稍候，原始录屏已保留</span></div><progress id="progress" max="100" value="0"></progress></section>
+    <section id="panel-capture" role="tabpanel" aria-labelledby="tab-capture" tabindex="0">
+      <div class="intro"><div><div class="eyebrow">小片刻，也值得清晰记录</div><h1>从屏幕，到动图<span>。</span></h1><p>录下操作，留下灵感。停下录制，GIF 即刻开始生成。</p></div><span class="edition">DESKTOP STUDIO<br><b>01 / CAPTURE</b></span></div>
+      <section class="workspace">
+        <div class="capture-panel">
+          <div class="panel-heading"><h2>录制来源</h2><button id="refresh" class="text-button">↻ 刷新</button></div>
+          <div class="segmented" role="group" aria-label="录制模式"><button data-mode="screen">▣ 整个屏幕</button><button data-mode="window">▤ 指定窗口</button><button data-mode="region" class="selected">⌗ 自选区域</button></div>
+          <div class="source-row"><select id="sources" aria-label="选择屏幕或窗口"><option>正在读取屏幕…</option></select><span id="source-count"></span></div>
+          <div class="preview" id="preview"><img id="thumbnail" alt="录制来源预览"><div class="preview-empty" id="preview-empty"><span>▣</span><b>你的下一段灵感，从这里开始</b><small>选择一个屏幕或窗口来预览</small></div><div id="crop-mark" hidden></div><div class="preview-label">SOURCE PREVIEW <span>静态预览</span></div></div>
+          <div class="preview-footer"><span id="selection-note">完整捕捉所选屏幕</span><button id="choose-region" class="text-button" hidden>拖选录制区域 ↗</button><span class="badge">Retina ready</span></div>
+        </div>
+        <aside class="capture-notes">
+          <div class="panel-heading"><h2>把精彩留下来</h2><span class="format">GIF</span></div>
+          <div class="steps"><div><span>01</span><p><b>选好画面</b><small>一个屏幕、一个窗口，或你想要的区域。</small></p></div><div><span>02</span><p><b>开始记录</b><small>三秒倒计时，准备好再出发。</small></p></div><div><span>03</span><p><b>停下，即成动图</b><small>自动转换，在「文件」里预览并保存。</small></p></div></div>
+          <button class="export-summary" data-open-tab="settings"><span class="summary-icon">✦</span><span><small>本次导出</small><b id="preset-summary">清晰均衡 · 15 fps</b><small id="size-summary">最多 1440 px · 无限循环</small></span><span class="chevron">›</span></button>
+          <p class="aside-note">想要更清晰，或更轻巧？<br>在底部「设置」中找到适合的画质。</p>
+        </aside>
+      </section>
+    </section>
+    <section id="panel-files" role="tabpanel" aria-labelledby="tab-files" tabindex="0" hidden>
+      <div class="flow-progress"><span>① 选择区域</span><i>›</i><span>② 录制</span><i>›</i><span class="flow-convert">③ 转 GIF</span><i>›</i><span class="flow-save">④ 保存到本地</span></div><p id="flow-caption" class="flow-caption"></p>
+      <div class="intro"><div><div class="eyebrow">让这一刻，继续流动</div><h1>好画面，随手分享<span>。</span></h1><p>本次会话最近一次录制。重要的片刻，记得保存到电脑。</p></div><span class="edition">YOUR LITTLE COLLECTION<br><b>02 / FILES</b></span></div>
+      <div id="files-empty" class="empty-card"><span class="empty-icon"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="7" y="5" width="26" height="30" rx="6"/><path d="m17 14 9 6-9 6z"/></svg></span><h2>第一段动图，等你来录</h2><p>录制完成后，GIF 和原始录屏会出现在这里。</p><button class="secondary" data-open-tab="capture">去录制 <span>↗</span></button><small>仅展示最近一次录制，不是永久文件库</small></div>
+      <section id="result" hidden><div class="result-title"><div><span class="eyebrow">READY TO SHARE</span><h2 id="result-heading">这一刻，已变成动图。</h2><p id="result-meta"></p></div><div class="result-actions"><button id="save-source" class="secondary">保存原始录屏</button><button id="save" class="primary">保存到本地</button><button id="reveal" class="text-button" hidden>在文件夹中显示</button></div></div><img id="gif" alt="生成的 GIF 预览"><p id="save-status" role="status"></p></section><div class="flow-footer"><span>选区 → 录制 → 自动转 GIF → 保存</span><button id="flow-new" class="secondary">再录一次</button></div>
+    </section>
+    <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" tabindex="0" hidden>
+      <div class="intro"><div><div class="eyebrow">清晰与轻巧，刚刚好</div><h1>让每一帧，都合心意<span>。</span></h1><p>选好你的偏好，下一次录制会沿用当前设置。</p></div><span class="edition">MAKE IT YOURS<br><b>03 / SETTINGS</b></span></div>
+      <section class="settings-card">
+        <div class="quality-settings"><div class="panel-heading"><h2>画质与体积</h2><span class="format">GIF</span></div><p class="label">为这次分享，选择合适的清晰度</p><div class="presets">
+          <button data-preset="clear" aria-pressed="false"><span class="preset-icon">✦</span><span><b>高清细节</b><small>1920 px · 20 fps · 保留更多画面细节</small></span><i></i></button>
+          <button data-preset="balanced" class="selected" aria-pressed="true"><span class="preset-icon">◈</span><span><b>清晰均衡 <em>推荐</em></b><small>1440 px · 15 fps · 清晰与体积兼顾</small></span><i></i></button>
+          <button data-preset="small" aria-pressed="false"><span class="preset-icon">◌</span><span><b>轻巧分享</b><small>960 px · 10 fps · 适合快速分享</small></span><i></i></button>
+        </div><div class="setting"><div><b>尽量小于 8 MB</b><small>必要时降低输出尺寸，不保证达到目标</small></div><label class="switch"><input type="checkbox" id="target" aria-label="尽量小于 8 MB"><span></span></label></div></div>
+        <aside class="settings-details"><div class="panel-heading"><h2>简单，也有讲究</h2></div><div class="hint"><span>✧</span><p>为屏幕文字优化的调色板。输出不会放大原画面，实际大小取决于时长与内容。</p></div><div class="specs"><span>音频 <b>不录制</b></span><span>循环播放 <b>无限循环</b></span><span>单次时长 <b>最长 120 秒</b></span><span>文件处理 <b>全部在本机完成</b></span></div><div class="settings-note"><b>关于原始录屏</b><p>区域模式会在生成 GIF 时裁剪。保留的原始录屏包含所选屏幕的完整画面。</p></div></aside>
+      </section>
+    </section>
+  </main>
+  <div class="bottom-shell">
+    <section class="action-bar"><div><span id="status-dot" class="status-dot"></span><b id="status">准备好，记录一点精彩</b><small id="shortcut">停止录制：⌘ / Ctrl + Shift + X</small></div><button id="record" class="primary"><span class="record-dot"></span><span id="record-label">开始录制</span></button></section>
+    <nav class="bottom-nav" aria-label="主导航"><div class="tab-list" role="tablist" aria-label="Luma 功能" aria-orientation="horizontal">
+      <button id="tab-capture" role="tab" aria-controls="panel-capture" aria-selected="true" tabindex="0" data-tab="capture"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="3"/><path d="M8 21h8m-4-4v4"/><circle cx="12" cy="10.5" r="2.5"/></svg><span>录制</span></button>
+      <button id="tab-files" role="tab" aria-controls="panel-files" aria-selected="false" tabindex="-1" data-tab="files"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="m10 11 5 3-5 3z"/></svg><span>文件</span><i id="file-dot" hidden></i></button>
+      <button id="tab-settings" role="tab" aria-controls="panel-settings" aria-selected="false" tabindex="-1" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 3v7m0 5v6M12 3v2m0 5v11M19 3v11m0 5v2"/><circle cx="5" cy="12.5" r="2.5"/><circle cx="12" cy="7.5" r="2.5"/><circle cx="19" cy="16.5" r="2.5"/></svg><span>设置</span></button>
+    </div></nav>
+  </div>
+  <script src="toolbar.js"></script><script src="renderer.js"></script>
+</body></html>
